@@ -1,0 +1,20 @@
+{
+  "description": "Flow v2.3 QA",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [],
+      "properties": {
+        "offset": {
+          "x": -90,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
