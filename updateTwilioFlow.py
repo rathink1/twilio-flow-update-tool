@@ -7,9 +7,11 @@ from twilio.rest import Client
 env = os.environ['env']
 commit_message = os.environ['commit_message']
 if env == 'QA':
+    # add your AWS QA secret name and region here
     secret_name = ""
     region_name = "eu-west-1"
 elif env == 'PROD':
+    # add your AWS Production secret name and region here
     secret_name = ""
     region_name = "us-east-1"
 
