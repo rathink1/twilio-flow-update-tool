@@ -13,3 +13,4 @@ pip3 install twilio --upgrade
 pip3 install boto3
 python3 ./updateTwilioFlow.py
 ```
+Also replace the flow-QA.json with your new flow json.
