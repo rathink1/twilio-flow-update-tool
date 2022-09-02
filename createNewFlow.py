@@ -1,4 +1,5 @@
-# run QA : python3 updateChatbotScriptV2.py -e QA -m v2.3.32 -P nexus-qa -r eu-west-1 -s qa/subaccounts
+# run cmd for QA env : python3 createNewFlow.py -e QA -P nexus-qa -r eu-west-1 -s qa/subaccounts -C <newclientname> -m v3.5
+
 import os
 import boto3
 import json
@@ -9,16 +10,17 @@ import argparse
 # Initialize parser
 parser = argparse.ArgumentParser()
 parser.add_argument("-e","--env")
-parser.add_argument("-m","--commitmesg")
 parser.add_argument("-P","--awsprofile")
 parser.add_argument("-r","--region")
 parser.add_argument("-s","--secretname")
+parser.add_argument("-C","--client")
+parser.add_argument("-m","--commitmesg")
 args = parser.parse_args()
 
 env = args.env
 if args.secretname is None :
     if env == 'QA':
-        secret_name = "twilio/qa/subaccounts"
+        secret_name = "twilio/qa/subaccounts" # change accordingly
     elif env == 'PROD':
         secret_name = "twilio/prod/subaccounts"
 else :
@@ -41,17 +43,18 @@ else:
 
 secret_json = json.loads(secret)
 
-flow_json_file = "./flow-"+ env +".json"
+flow_json_file = "flow-"+ env +".json" # change to your file location
 
 for account_sid in secret_json.keys() :
     auth_token = secret_json.get(account_sid)
     client = Client(account_sid, auth_token)
     account = client.api.v2010.accounts(account_sid).fetch()
-    print("Searching " + account.friendly_name)
-    flows = client.studio.v2.flows.list(limit=50)
-    for flow in flows:
-        #this will update all flows with name having environment name (QA/PROD)
-        if env in flow.friendly_name:
-            print("Updating " + account_sid + "  " + account.friendly_name + "  " + flow.sid + "  " + flow.friendly_name)
-            flow = client.studio.v2.flows(flow.sid) \
-                .update(commit_message=commit_message, definition=json.load(open(flow_json_file)), status='published')
+
+    if account.friendly_name == args.client:
+        flows = client.studio.v2.flows.list(limit=50)
+        print("Found client : " + account.friendly_namen + " Listing flows : " + flows)
+
+        if not flows or not any(env in flowname.friendly_name for flowname in flows) :
+            print("Creating a new flow for client : " + account.friendly_name + " acc Id : " + account_sid)
+            flow = client.studio.v2.flows.create(commit_message=commit_message, definition=json.load(open(flow_json_file)), friendly_name=flow_json_file,
+                                                 status='draft')
